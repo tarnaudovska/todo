@@ -6,21 +6,18 @@
     <h1>Task list
     {% if current_user.is_authenticated %}
     of: {{ current_user.name }}
-    {% endif %}
   </h1>
   </div>
 </header>
 <body>
-  <form action="{{ url_for('home') }}" method="post">
-    {{ form.hidden_tag() }}
+  <form action="{{ url_for('home_user', user_id=current_user.id) }}" method="post">
+      {{ form.hidden_tag() }}
       <div class="container position-relative px-4 px-lg-5">
       <div class="d-grid gap-2 d-sm-flex ">
       <div class="col-md-7">
         <label for="task" class="form-label">Task:</label>
         {{ form.text(class="form-control") }}        
       </div>
-      
-
       <div class="col-md-2">
         <label for="priority" class="form-label">Priority:</label><br>
         {{ form.priority(class="btn btn-primary")}}
@@ -29,27 +26,35 @@
       <div class="mt-3">
         {{ form.submit(type="submit", class="btn btn-primary")}}
       </div>
+  
+      {% endif %}
     </form>
   </div>
 </body>
 {% for task in tasks %}
-<div
-  class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary"
-  style="width: 380px"
->
+<div class="container position-relative px-4 px-lg-5">
+  <div class="d-grid gap-2 d-sm-flex ">
+  <div class="col-md-7">
 {% if current_user.id == task.user_task_id %}
-  <a
-    href="/"
-    class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom"
-  >
-    <svg class="bi pe-none me-2" width="30" height="24">
-      <use xlink:href="#bootstrap"></use>
-    </svg>
-    
-    <span class="fs-5 fw-semibold">Task: {{ task.text }} 
-      Priority: {{ task.priority }}</span>
-  </a>
-  {% endif %}
+
+<svg class="bi pe-none me-2" width="30" height="24">
+  <use xlink:href="#bootstrap"></use>
+</svg>
+<label class="list-group-item d-flex gap-3">
+  <input class="form-check-input flex-shrink-0" type="checkbox" value="" checked="" style="font-size: 1.375em;">
+  <span class="pt-1 form-checked-content">
+    <strong>{{ task.text }} </strong>
+    <small class="d-block text-body-secondary">
+      <svg class="bi me-1" width="1em" height="1em"><use xlink:href="#calendar-event"></use></svg>
+      Priority: {{ task.priority }}
+    </small>
+  </span>
+</label>
+
+{% endif %}
+</div>
+</div>
+</div>
 </div>
 
 {% endfor %} {% include "footer.html" %}
