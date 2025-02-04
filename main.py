@@ -51,13 +51,23 @@ with app.app_context():
     db.create_all()
 
 # Home route
-@app.route('/', methods=["GET", "POST"])
+@app.route('/', methods=["GET"])
 def home():
+    return render_template("index.html")
+
+# Home route for user logged in
+@app.route('/user/<int:user_id>', methods=["GET", "POST"])
+@login_required
+def home_user(user_id):
     stmt = db.session.scalars(select(Todo).order_by(Todo.priority))
     tasks = stmt.all()
     form = TodoForm()
+    user = db.get_or_404(User, user_id)
     if form.validate_on_submit():
-        print("inside form validation")
+        if not current_user.is_authenticated:
+            flash("You need to login to comment.")
+            return redirect(url_for("login"))
+        
         new_task = Todo(
             text = form.text.data,
             date = date.today().strftime("%B %d, %Y"),
@@ -66,7 +76,7 @@ def home():
         )
         db.session.add(new_task)
         db.session.commit()
-        return redirect(url_for('home'))
+        return redirect(url_for('home_user', user_id=user.id))
     return render_template("index.html", tasks=tasks, form=form, current_user=current_user)
 
 # Register route
@@ -88,7 +98,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for('home'))
+        return redirect(url_for('home_user', user_id=current_user.id))
     return render_template('register.html', form=form, current_user=current_user)
 
 @app.route('/login', methods=["GET", "POST"])
@@ -101,7 +111,7 @@ def login():
         if user and check_password_hash(user.password, password):
             login_user(user)
             flash("Login successful", "success")
-            return redirect(url_for('home'))
+            return redirect(url_for('home_user', user_id=current_user.id))
         else:
             flash("Invalid email or password", "error")
     return render_template('login.html', form=form, current_user=current_user)
