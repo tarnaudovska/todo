@@ -51,12 +51,12 @@ with app.app_context():
     db.create_all()
 
 # Home route
-@app.route('/')
+@app.route('/', methods=["GET"])
 def home():
     return render_template("index.html")
 
 # Home route for user logged in
-@app.route('/<int:user_id>', methods=["GET", "POST"])
+@app.route('/user/<int:user_id>', methods=["GET", "POST"])
 @login_required
 def home_user(user_id):
     stmt = db.session.scalars(select(Todo).order_by(Todo.priority))
