@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import Integer, String, Text, select
+from sqlalchemy import Integer, String, Text, Boolean, select
 from forms import TodoForm, RegisterForm, LoginForm
 import os
 
@@ -43,6 +43,7 @@ class Todo(db.Model):
     text: Mapped[str] = mapped_column(String, nullable=False)
     date: Mapped[str] = mapped_column(String(100), nullable=False)
     priority: Mapped[str] = mapped_column(String, nullable=True)
+    # check: Mapped[int] = mapped_column(Boolean, nullable=False)
 
     user_task_id: Mapped[int] = mapped_column(Integer, db.ForeignKey("users.id"))
     user_task = relationship('User', back_populates="task")
@@ -53,18 +54,20 @@ with app.app_context():
 # Home route
 @app.route('/', methods=["GET"])
 def home():
+    if current_user.is_authenticated:
+        return redirect(url_for("home_user"))
     return render_template("index.html")
 
 # Home route for user logged in
-@app.route('/user/<int:user_id>', methods=["GET", "POST"])
+@app.route('/user/me', methods=["GET", "POST"])
 @login_required
-def home_user(user_id):
+def home_user():
     stmt = db.session.scalars(select(Todo).where(Todo.user_task_id==current_user.id).order_by(Todo.priority))
     tasks = stmt.all()
     form = TodoForm()
     if form.validate_on_submit():
         if not current_user.is_authenticated:
-            flash("You need to login to comment.")
+            flash("You need to be logged in.")
             return redirect(url_for("login"))
         
         new_task = Todo(
@@ -75,8 +78,30 @@ def home_user(user_id):
         )
         db.session.add(new_task)
         db.session.commit()
-        return redirect(url_for('home_user', user_id=current_user.id))
-    return render_template("index.html", tasks=tasks, form=form, current_user=current_user)
+        return redirect(url_for('home_user'))
+    return render_template("index.html", tasks=tasks, form=form)
+
+# Edit route
+@app.route('/task/<int:task_id>/edit', methods=["GET", "POST"])
+@login_required
+def edit_task(task_id):
+    task = db.get_or_404(Todo, task_id)
+    if task.user_task_id!=current_user.id:
+        return redirect(url_for("home_user"))
+    
+    edit_form = TodoForm(
+        text = task.text,
+        priority = task.priority
+    )
+
+    if edit_form.validate_on_submit():
+        task.text = edit_form.text.data
+        task.priority = edit_form.priority.data
+        db.session.commit()
+        return redirect(url_for("home_user"))
+    
+    
+    return render_template("edit_task.html", form=edit_form, task=task)
 
 # Register route
 @app.route('/register', methods=["GET", "POST"])
@@ -97,7 +122,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for('home_user', user_id=current_user.id))
+        return redirect(url_for('home_user'))
     return render_template('register.html', form=form, current_user=current_user)
 
 @app.route('/login', methods=["GET", "POST"])
@@ -110,7 +135,7 @@ def login():
         if user and check_password_hash(user.password, password):
             login_user(user)
             flash("Login successful", "success")
-            return redirect(url_for('home_user', user_id=current_user.id))
+            return redirect(url_for('home_user'))
         else:
             flash("Invalid email or password", "error")
     return render_template('login.html', form=form, current_user=current_user)
