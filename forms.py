@@ -8,7 +8,7 @@ class TodoForm(FlaskForm):
     text = StringField("Todo Title", validators=[DataRequired()])
     priority = SelectField(u'Programming Language', choices=[('1', 'High'), ('2', 'Medium'), ('3', 'Low')])
     date = date.today().strftime("%B %d, %Y")
-    submit = SubmitField('Submit Todo Task')
+    submit = SubmitField('Create Task')
 
 # register form for new users
 class RegisterForm(FlaskForm):
