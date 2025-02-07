@@ -1,2 +1,3 @@
 ﻿.venv
 __pycache__
+instance/todo-list.db
