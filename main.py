@@ -59,10 +59,9 @@ def home():
 @app.route('/user/<int:user_id>', methods=["GET", "POST"])
 @login_required
 def home_user(user_id):
-    stmt = db.session.scalars(select(Todo).order_by(Todo.priority))
+    stmt = db.session.scalars(select(Todo).where(Todo.user_task_id==current_user.id).order_by(Todo.priority))
     tasks = stmt.all()
     form = TodoForm()
-    user = db.get_or_404(User, user_id)
     if form.validate_on_submit():
         if not current_user.is_authenticated:
             flash("You need to login to comment.")
@@ -76,7 +75,7 @@ def home_user(user_id):
         )
         db.session.add(new_task)
         db.session.commit()
-        return redirect(url_for('home_user', user_id=user.id))
+        return redirect(url_for('home_user', user_id=current_user.id))
     return render_template("index.html", tasks=tasks, form=form, current_user=current_user)
 
 # Register route

@@ -35,7 +35,6 @@
 {% endif %}
 <div class="container position-relative px-4 px-lg-5 mb-5">
 {% for task in tasks %}
-  {% if current_user.id == task.user_task_id %}
     <div class="list-group">
       <div class="col-md-7 mb-2">
         <label class="list-group-item border-0 rounded-2 d-flex gap-2 priority-{{task.priority}}">
@@ -46,7 +45,6 @@
         </label>
       </div>
     </div>
-    {% endif %}
     {% endfor %}
   </div>
 {% include "footer.html" %}
