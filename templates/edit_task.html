@@ -1,0 +1,44 @@
+{% include "header.html" %}
+
+<!-- Page Header -->
+<header
+  class="masthead border border-warning"
+  style="
+    background-image: url('../static/assets/img/header_img.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 200px;
+  "
+>
+  <div class="py-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">Edit your task</h1>
+  </div>
+</header>
+{% if current_user.is_authenticated %}
+<body>
+  <div class="container position-relative px-4 px-lg-5 mt-3 mb-2">
+    <form action="{{ url_for('edit_task', task_id=task.id) }}" method="post">
+      {{ form.hidden_tag() }}
+      <div class="container position-relative px-lg-5 mb-3 mt-3">
+        <div class="list-group d-flex">
+          <div class="row mb-2 border-bottom">
+            <div class=" mb-2">
+              <label for="task" class="form-label">Task:</label>
+              {{ form.text(class="form-control") }}
+
+              <div class="col-md-2 mt-2">
+                <label for="priority" class="form-label">Priority:</label><br />
+                {{ form.priority(class="btn btn-outline-primary") }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-2 mb-2">
+            {{ form.submit(value="Submit changes", class="btn btn-primary") }}
+          </div>
+        </div>
+      </div>
+      {% include "footer.html" %}
+    </form>
+  </div>
+</body>
+{% endif %}
