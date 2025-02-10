@@ -49,20 +49,23 @@
   </div>
 </body>
 {% endif %}
-<div class="container position-relative px-lg-5 mb-3 mt-3">
+<div class="container px-lg-5 mb-3 mt-3">
   <div class="list-group d-flex">
     {% for task in tasks %}
-    <div class="row mb-2">
-      <div class="col-md-5">
+    <div class="row justify-content-md mb-2">
+      <div class="col col-lg-5">
         <div class="list-group-item border-0 rounded-2 priority-{{task.priority}}">
           <strong>{{ task.text }}</strong>
         </div>
       </div>
-      <div class="col-md-2">
-        <a class="btn btn-outline-dark col-lg-1 position-absolute" href="{{url_for('edit_task', task_id=task.id)}}">
+      <div class="col col-lg-1">
+        <a class="btn btn-primary position-absolute" href="{{url_for('edit_task', task_id=task.id)}}">
           Edit
         </a>
       </div>
+      <div class="col col-lg-1">
+      <a class="btn btn-secondary position-absolute" href="{{url_for('delete_task', task_id=task.id) }}">Delete</a>
+    </div>
     </div>
     {% endfor %}
   </div>
